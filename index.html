@@ -595,13 +595,23 @@ color:black'>(2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nb
         html2pdf().set(opt).from(element).save();
       };
 
+      function cleanHtmlForDocx(html) {
+        // This is a more targeted cleaning function.
+        // It removes MSO (Microsoft Office) specific classes which can cause issues,
+        // but preserves the inline styles that define the layout.
+        let cleanHtml = html.replace(/ class=MsoNormal/g, '');
+        // Also remove language attributes which can be problematic
+        cleanHtml = cleanHtml.replace(/ lang=EN-IN/g, '');
+        return cleanHtml;
+      }
+
       window.downloadDOCX = function () {
         const element = document.getElementById("preview");
-        const html =
-          '<html><head><meta charset="utf-8"></head><body>' +
-          element.innerHTML +
-          "</body></html>";
-        const converted = window.htmlDocx.asBlob(html);
+        const cleanedHtml = cleanHtmlForDocx(element.innerHTML);
+
+        const fullHtml = '<html><head><meta charset="utf-8"></head><body>' + cleanedHtml + '</body></html>';
+
+        const converted = window.htmlDocx.asBlob(fullHtml);
         const link = document.createElement("a");
         link.href = URL.createObjectURL(converted);
         link.download = "RentAgreement.docx";
