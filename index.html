@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rent Agreement Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f7f7f7;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 30px 40px 40px 40px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 40px;
+      }
+      .form-section {
+        flex: 1;
+      }
+      .preview-section {
+        flex: 2;
+        background: #fcfcfc;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        min-width: 400px;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      label {
+        display: block;
+        margin: 16px 0 6px 0;
+        font-weight: bold;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        margin-top: 24px;
+        width: 48%;
+        padding: 12px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .button-row {
+        display: flex;
+        gap: 4%;
+      }
+      @media (max-width: 900px) {
+        .container {
+          flex-direction: column;
+        }
+        .preview-section {
+          min-width: unset;
+        }
+      }
+
+      /* Mobile-specific styles */
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
+          margin: 10px;
+        }
+        h1 {
+          font-size: 1.8rem;
+        }
+        .button-row {
+          flex-direction: column;
+          gap: 10px;
+        }
+        button {
+          width: 100%;
+        }
+      }
+
+      /* Print-specific styles for PDF generation */
+      @media print {
+        body, .container, .preview-section {
+          margin: 0 !important;
+          padding: 0 !important;
+          box-shadow: none !important;
+          background: #fff !important;
+        }
+        .form-section, .button-row {
+          display: none !important;
+        }
+        #preview {
+          max-width: 100% !important;
+          border: none !important;
+          padding: 0 !important;
+        }
+        .WordSection1 p {
+          font-size: 12pt !important;
+          line-height: 1.5 !important;
+          margin: 0 0 12px 0 !important;
+          text-align: justify !important;
+        }
+        .WordSection1 h1, .WordSection1 h2, .WordSection1 h3, .WordSection1 b, .WordSection1 u {
+            font-size: inherit !important; /* Let the parent p tag control the size */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Rent Agreement Generator</h1>
+    <div class="container">
+      <div class="form-section">
+        <form id="rentForm">
+          <label>Owner Name: <input name="Owner_Name" /></label>
+          <label>Owner Caste: <input name="Owner_Cast" /></label>
+          <label>Owner Age: <input name="Owner_Age" /></label>
+          <label>Owner Occupation: <input name="Owner_Occupation" /></label>
+          <label
+            >Owner Address: <textarea name="Owner_Address"></textarea>
+          </label>
+          <label>Rental Name: <input name="Rental_Name" /></label>
+          <label>Rental Caste: <input name="Rental_Cast" /></label>
+          <label>Rental Age: <input name="Rental_Age" /></label>
+          <label>Rental Occupation: <input name="Rental_Occupation" /></label>
+          <label
+            >Rental Address: <textarea name="Rental_Address"></textarea>
+          </label>
+          <label
+            >Property Address: <textarea name="Property_Address"></textarea>
+          </label>
+          <label>BHK: <input name="BHK" /></label>
+          <label>Extra Content after BHK: <input name="ExtraContent" /></label>
+          <label>Agreement Start Date: <input name="Agreement_Start" /></label>
+          <label>Agreement End Date: <input name="Agreement_End" /></label>
+          <label>Rent (number): <input name="Rent" /></label>
+          <label>Rent (in words): <input name="Rent_in_words" /></label>
+          <label>Deposit (number): <input name="Deposit" /></label>
+          <label>Deposit (in words): <input name="Desopit_in_words" /></label>
+          <div class="button-row">
+            <button type="button" onclick="downloadPDF()">Download PDF</button>
+            <button type="button" onclick="downloadDOCX()">
+              Download DOCX
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="preview-section">
+        <div
+          id="preview"
+          style="
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: auto;
+          "
+        >
+          <!-- The template will be rendered here -->
+        </div>
+      </div>
+    </div>
+    <script>
+      // The full HTML template from your updated file, with placeholders and all sections/images
+      const template = `
+<div class=WordSection1>
+
+<p class=MsoNormal align=center style='text-align:center'><b><u><span
+lang=EN-IN style='font-size:18.0pt;line-height:107%'>LEAVE &amp; LICENSE
+AGREEMENT</span></u></b></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-IN
+style='font-size:15.0pt;line-height:107%'>This Agreement made this </span><b><u><span
+lang=EN-IN style='font-size:15.0pt;line-height:107%'>       </span></u></b><b><span
+lang=EN-IN style='font-size:15.0pt;line-height:107%'>th day of <u>                      </u> 2025</span></b></p>
+
+<p class=MsoNormal><b><span lang=EN-IN style='font-size:15.0pt;line-height:
+107%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-right:.1pt;line-height:180%'><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>{Owner_Name}</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>, </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>{Owner_Cast} </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>by Caste, Aged about: </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>{Owner_Age} </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>years, Occupation:</span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'> {Owner_Occupation}</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>, Residing at: </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>{Owner_Address} </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>(here in after referred as
+the “Licensor”) which expression shall unless repugnant to the context or
+meaning there of would mean and included her/his administrators and assigns) of
+the ONE PART.  </span></p>
+
+<p class=MsoNormal style='margin-right:.1pt;line-height:180%'><span lang=EN-IN
+style='font-size:14.0pt;line-height:180%'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-right:.1pt;line-height:182%'><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>{Rental_Name}</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>,  </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>{Rental_Cast} </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>by Caste,  Aged about: </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>{Rental_Age}</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> years, Occupation:</span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> {Rental_Occupation}</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>, Residing at  <b>{Rental_Address}</b></span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>(here in after referred as
+the “Licensee”)  which expression shall unless repugnant to the context or
+meaning  there of would mean and included her/his administrators and assigns)</span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>  of the other part.</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> </span></b></p>
+
+<p class=MsoNormal style='margin-right:.1pt;line-height:182%'><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-right:.1pt;line-height:200%'><span lang=EN-IN
+style='font-size:14.0pt;line-height:200%'>That the Licensor is ready or offer
+and the Licensee is willing to accept the use of the Premises, viz. </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:200%'>{Property_Address} {BHK}
+BHK {ExtraContent} </span></b><span lang=EN-IN style='font-size:14.0pt;line-height:200%'>for </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:200%'>Residential </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:200%'>purpose only with all the
+fittings and fixtures for a period of </span><b><span lang=EN-IN
+style='font-size:14.0pt;line-height:200%'>11 (Eleven) months </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:200%'>with effect from </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:200%'>date ({Agreement_Start} to
+</span></b><span lang=EN-IN style='font-size:14.0pt;line-height:200%'></span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:200%'>{Agreement_End})</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:200%'> subject to the following
+conditions:-  </span></p>
+
+<p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:.55pt;text-align:center;text-indent:-.5pt'><b><u><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>NOW THIS AGREEMENT
+WITHNESSETH AS FOLLOWS:</span></u></b><b><span lang=EN-IN style='font-size:
+14.0pt;line-height:107%'>   </span></b></p>
+
+<p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:.55pt;text-align:center;text-indent:-.5pt'><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:182%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:182%;font-family:"Arial",sans-serif;
+color:black'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:182%'>That
+the Licensee shall pay to the Licenser for the use and occupation of the above
+said premises a sum of </span><b><span lang=EN-IN style='font-size:14.0pt;
+line-height:182%'>Rs.{Rent}/- (Rupees {Rent_in_words} Only) with maintenance and Property
+Tax</span></b><span lang=EN-IN style='font-size:14.0pt;line-height:182%'> by
+Cash or Bank Draft/cheque payable at Surat for each calendar month on or before
+the 1 to 5<sup>th</sup> of the months. The Licensee had paid to the Licensor an
+interest free deposit of </span><b><span lang=EN-IN style='font-size:14.0pt;
+line-height:182%'>Rs.{Deposit}/- (Rupees {Desopit_in_words} Only) </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>towards Security Deposit
+by Online Transfer shall be</span><b><span lang=EN-IN style='font-size:14.0pt;
+line-height:182%'> </span></b><span lang=EN-IN style='font-size:14.0pt;
+line-height:182%'>refunded on handing over the possession to the Licenser after
+the agreement period.</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:181%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:181%;font-family:"Arial",sans-serif;
+color:black'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:181%'>That
+the agreement shall be for a period of </span><b><span lang=EN-IN
+style='font-size:14.0pt;line-height:181%'>11 (Eleven) months</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:181%'> in the first instance and
+may be extended by mutual consent and under such terms and conditions as may be
+mutually agreed upon at least one month prior to the expiry of this agreement.
+</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:179%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:179%;font-family:"Arial",sans-serif;
+color:black'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:179%'>The
+Licensee granted for use the premises in meant strictly for </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:179%'>Residential</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:179%'> use of the Licensee. </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:179%'>This Leave and License
+renew will be 5% increment.</span></b><span lang=EN-IN style='font-size:14.0pt;
+line-height:179%'></span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:180%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:180%;font-family:"Arial",sans-serif;
+color:black'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:180%'>The
+Licensee is not eligible to any right of tenant except which is providing in
+this agreement.</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>We
+clean the property daily in the property provided by us signature must be kept
+clean.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>That
+the Licensee shall pay all charges in respect of utilities like electric power
+bill per unit and Gas Bill as per meter reading. Water Motor Charges used in
+the premises during the period of occupation as per the meter regarding to the
+concerned authorities.</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>That
+the Licensee shall not carry out any structural additions or alterations to the
+buildings, layouts, fittings and fixtures without the written consent of the
+Licenser.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>8.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>It has
+been agreed between the parties, that at the time of handing over possession of
+the premises, the premises would be cleared property.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>9.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>That
+the Licensee agrees not to sub-let, assign and/or part with the said premises
+or any part there of to any one without the written consent of the Licensor.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>10.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>This
+agreement shall be terminable by the Licensee/ Licensor by giving the </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:149%'>one month</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:149%'> notice.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>11.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>When
+the Licensee handover the property to Licensor, any left over the dues like
+light bill, telephone bills, Licensee fees will be deducted from the deposit
+amount by the Licensor.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>12.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>That
+the Licensee will keep the interiors of the premises with all fixtures and
+fittings there in good condition and deliver the same to the Licensor at the
+expiry of the agreement in good condition. Any normal wear and tear damage
+shall be borne by the Licensee.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:149%'><span
+lang=EN-IN style='font-size:13.0pt;line-height:149%;font-family:"Arial",sans-serif;
+color:black'>13.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:149%'>In
+case of any dispute as to the interpretation of this agreement as to the breach
+of enforcement of any terms and conditions thereof, the dispute will be referred
+to mutually agreed arbitrator as provided under the Arbitration Act. The
+decision of the Arbitrators will be final and binding on both the parties.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:0in;text-align:justify;line-height:149%'><span lang=EN-IN
+style='font-size:14.0pt;line-height:149%'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
+margin-left:0in;text-align:justify;line-height:149%'><span lang=EN-IN
+style='font-size:14.0pt;line-height:149%'>&nbsp;</span></p>
+
+<p class=MsoNormal align=center style='margin-top:0in;margin-right:0in;
+margin-bottom:6.1pt;margin-left:.5pt;text-align:center;text-indent:-.5pt'><b><u><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>DESCRIPTION OF PROPERTY</span></u></b></p>
+
+<p class=MsoNormal align=center style='margin-bottom:14.15pt;text-align:center'><b><u><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>GIVEN ON LEAVE AND LICENSE</span></u></b></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:13.6pt;
+margin-left:0in'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'>Part
+of the property situated on the </span><b><span lang=EN-IN style='font-size:
+14.0pt;line-height:107%'>{Property_Address} {BHK} BHK {ExtraContent} </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>for </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>Residential </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>purpose. </span></p>
+
+<p class=MsoNormal style='margin-right:.1pt'><span lang=EN-IN style='font-size:
+14.0pt;line-height:107%'> In witness whereof the parties hereto have signed
+this leave and license agreement and set their hands hereto in the presence of
+witness.  </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
+lang=EN-IN> </span></p>
+
+
+
+
+
+<p class=MsoNormal style='margin-bottom:6.25pt'>
+<img width=85 height=103 id="Group 3029" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABnAgMAAAAMKeZvAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAMUExURQAAAAAAAAAAAAAAADXpN5YAAAAEdFJOU8//AO8TkFPOAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAK0lEQVRIx2MQDcUCGBiyVmEBDqPCo8KjwqPCo8KjwqPCo8IjSvgqtpbSAQB2SI+4JzxktAAAAABJRU5ErkJggg==" align=left hspace=12>
+<span lang=EN-IN>        
+<img width=94 height=52 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAAA0CAMAAAA0Y39gAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABjUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGZodN4AAAAhdFJOUwAoUICfv7dgQCCnx//Xr0jfWDBoOM+Hl+d4GPcIEI9w7xAu6QkAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAH8SURBVFhHtZjZsoMgDIZVQEUUUYtbQfv+T3nGpa1yxKLid9PhhyZhmRB0HANcDwAAIJrxh1YQqqNOgEMQkTihk8GZdHIWMx9kufoPY3BBY4ZA9lA73uAURDzm4ISLvOSs8lR1ixzw2mzkmweseXMgpragT5qpqgaPkKBVxV8IL2KFUNV/iIJR7WLvg6sa7Icly7rCqmiOBAzuOEiTRqraMUSQBKo2I6G/49oUnZVU6/cgm4aqbadnkJAqZ0j4xVq4hkdWeyj9dNm8Ts4XB1BQy9YdB/Nv/HBjL66Sk/f6N6XSZYUsmn6/fuwSTUmOH8iNR2jZELZHVd0WXX9j8FP4bqKq9vBTp+9U0R5959BD1+Qxcu6Qk3eTCW3tsAu300/iu83fvDi2U/GSnN99MHOuivYYDv29SeHG1RktC2atRFgzGw6R2mGHai4+xrxsnU/UwrfxTlJYlAqSuOu+66xMYmT5dLZrgxhZTT0uUcKVpLRXjjTLEvCjWZpA629G6tqZQJDocrCFCWAf6t9PLiGmz9NNQsp0oU88ItafXaKMoN9lB+7q8v/G/0QWLDJbWtmwpDMbOuP25HXkQTyMh5l+k5aEXXIwmgEZRC8EQbhzG4iw6NAL9WczVhgAVD9R1Q9fiT6TF0MrAIiNPWZT1DPGiBBi8cxzaEHw9afnD3D4GjlZ9lbfAAAAAElFTkSuQmCC">
+</span>
+<span lang=EN-IN>                                                 </span>
+</p>
+
+
+
+
+
+
+
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
+lang=EN-IN> </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span lang=EN-IN style='font-size:
+14.0pt;line-height:107%'> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:133.1pt;margin-bottom:
+.4pt;margin-left:.5pt;text-indent:-.5pt;line-height:106%'><span lang=EN-IN
+style='font-size:16.0pt;line-height:106%'>Signed, Sealed and delivered by the
+within named Licensor </span><span lang=EN-IN style='font-size:12.0pt;
+line-height:106%'> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:.15pt;
+margin-left:.5pt;text-indent:-.5pt'><b><span lang=EN-IN style='font-size:14.0pt;
+line-height:107%'>{Owner_Name}</span></b><span lang=EN-IN style='font-size:
+14.0pt;line-height:107%'>                                            </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>____________________</span></b></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:.3pt;
+margin-left:.75pt'><span lang=EN-IN> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
+lang=EN-IN> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:382.45pt;margin-bottom:
+.15pt;margin-left:.75pt;line-height:102%'><span lang=EN-IN> </span><span
+lang=EN-IN style='font-size:14.0pt;line-height:102%'> </span><span lang=EN-IN> </span></p>
+
+<p class=MsoNormal style='margin-bottom:6.25pt'>
+<img width=85 height=103 id="Group 3029" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABnAgMAAAAMKeZvAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAMUExURQAAAAAAAAAAAAAAADXpN5YAAAAEdFJOU8//AO8TkFPOAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAK0lEQVRIx2MQDcUCGBiyVmEBDqPCo8KjwqPCo8KjwqPCo8IjSvgqtpbSAQB2SI+4JzxktAAAAABJRU5ErkJggg==" align=left hspace=12>
+<span lang=EN-IN>        
+<img width=94 height=52 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAAA0CAMAAAA0Y39gAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABjUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGZodN4AAAAhdFJOUwAoUICfv7dgQCCnx//Xr0jfWDBoOM+Hl+d4GPcIEI9w7xAu6QkAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAH8SURBVFhHtZjZsoMgDIZVQEUUUYtbQfv+T3nGpa1yxKLid9PhhyZhmRB0HANcDwAAIJrxh1YQqqNOgEMQkTihk8GZdHIWMx9kufoPY3BBY4ZA9lA73uAURDzm4ISLvOSs8lR1ixzw2mzkmweseXMgpragT5qpqgaPkKBVxV8IL2KFUNV/iIJR7WLvg6sa7Icly7rCqmiOBAzuOEiTRqraMUSQBKo2I6G/49oUnZVU6/cgm4aqbadnkJAqZ0j4xVq4hkdWeyj9dNm8Ts4XB1BQy9YdB/Nv/HBjL66Sk/f6N6XSZYUsmn6/fuwSTUmOH8iNR2jZELZHVd0WXX9j8FP4bqKq9vBTp+9U0R5959BD1+Qxcu6Qk3eTCW3tsAu300/iu83fvDi2U/GSnN99MHOuivYYDv29SeHG1RktC2atRFgzGw6R2mGHai4+xrxsnU/UwrfxTlJYlAqSuOu+66xMYmT5dLZrgxhZTT0uUcKVpLRXjjTLEvCjWZpA629G6tqZQJDocrCFCWAf6t9PLiGmz9NNQsp0oU88ItafXaKMoN9lB+7q8v/G/0QWLDJbWtmwpDMbOuP25HXkQTyMh5l+k5aEXXIwmgEZRC8EQbhzG4iw6NAL9WczVhgAVD9R1Q9fiT6TF0MrAIiNPWZT1DPGiBBi8cxzaEHw9afnD3D4GjlZ9lbfAAAAAElFTkSuQmCC">
+</span>
+<span lang=EN-IN>                                                 </span>
+</p>
+
+<p class=MsoNormal style='margin-bottom:1.85pt'><span lang=EN-IN
+style='font-size:14.0pt;line-height:107%'> </span></p>
+
+<p class=MsoNormal style='margin-bottom:2.1pt'><span lang=EN-IN
+style='font-size:14.0pt;line-height:107%'> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:133.1pt;margin-bottom:
+.4pt;margin-left:.5pt;text-indent:-.5pt;line-height:106%'><span lang=EN-IN
+style='font-size:16.0pt;line-height:106%'>Signed, Sealed and delivered by the
+within named Licensee </span><span lang=EN-IN style='font-size:12.0pt;
+line-height:106%'> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:.15pt;
+margin-left:.5pt;text-indent:-.5pt'><b><span lang=EN-IN style='font-size:14.0pt;
+line-height:107%'>{Rental_Name}</span></b><span lang=EN-IN style='font-size:
+14.0pt;line-height:107%'>                                            </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:107%'>____________________</span></b></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.75pt'><b><i><span lang=EN-IN style='font-size:17.0pt;line-height:
+107%'> </span></i></b><span lang=EN-IN> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.75pt'><span lang=EN-IN>&nbsp;</span></p>
+
+<h1><span lang=EN-IN>WITNESS: -  </span></h1>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:133.1pt;margin-bottom:
+.4pt;margin-left:36.05pt;text-indent:-36.05pt;line-height:106%'><span
+lang=EN-IN style='font-size:14.0pt;line-height:106%;font-family:"Arial",sans-serif;
+color:black'>(1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:106%'>_______________
+</span><span lang=EN-IN> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
+lang=EN-IN> </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:133.1pt;margin-bottom:
+.4pt;margin-left:36.05pt;text-indent:-36.05pt;line-height:106%'><span
+lang=EN-IN style='font-size:14.0pt;line-height:106%;font-family:"Arial",sans-serif;
+color:black'>(2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:106%'>_______________
+</span><span lang=EN-IN> </span></p>
+
+<p class=MsoNormal><span lang=EN-IN>&nbsp;</span></p>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    
+`;
+
+
+
+
+
+
+
+      function fillTemplate(data) {
+        let html = template;
+        for (const key in data) {
+          const regex = new RegExp("{" + key + "}", "g");
+          html = html.replace(regex, data[key] || "");
+        }
+        return html;
+      }
+
+      function updatePreview() {
+        const form = document.getElementById("rentForm");
+        const data = Object.fromEntries(new FormData(form).entries());
+        document.getElementById("preview").innerHTML = fillTemplate(data);
+      }
+
+      document
+        .getElementById("rentForm")
+        .addEventListener("input", updatePreview);
+      window.onload = updatePreview;
+
+      window.downloadPDF = function () {
+        const element = document.getElementById("preview");
+        const opt = {
+          margin:       0.5, // 0.5 inch margin
+          filename:     'RentAgreement.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+          jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        // New Promise-based usage
+        html2pdf().set(opt).from(element).save();
+      };
+
+      window.downloadDOCX = function () {
+        const element = document.getElementById("preview");
+        const html =
+          '<html><head><meta charset="utf-8"></head><body>' +
+          element.innerHTML +
+          "</body></html>";
+        const converted = window.htmlDocx.asBlob(html);
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(converted);
+        link.download = "RentAgreement.docx";
+        link.click();
+      };
+    </script>
+  </body>
+</html>
