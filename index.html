@@ -106,11 +106,11 @@
       /* Mobile-specific styles */
       @media (max-width: 600px) {
         .container {
-          padding: 20px;
-          margin: 10px;
+          padding: 12px;
+          margin: 0;
         }
         h1 {
-          font-size: 1.8rem;
+          font-size: 1.5rem;
         }
         .button-row {
           flex-direction: column;
@@ -118,6 +118,45 @@
         }
         button {
           width: 100%;
+          font-size: 1.1rem;
+          padding: 14px;
+        }
+        .form-section, .preview-section {
+          padding: 10px;
+        }
+        label {
+          font-size: 1rem;
+        }
+        input, textarea {
+          font-size: 1rem;
+        }
+        .preview-section {
+          padding: 8px;
+        }
+      }
+
+      /* Extra small devices (phones <400px) */
+      @media (max-width: 400px) {
+        .container {
+          padding: 2px;
+          margin: 0;
+        }
+        h1 {
+          font-size: 1.1rem;
+        }
+        .form-section, .preview-section {
+          padding: 2px;
+        }
+        label {
+          font-size: 0.95rem;
+        }
+        input, textarea {
+          font-size: 0.95rem;
+          padding: 6px;
+        }
+        button {
+          font-size: 1rem;
+          padding: 10px;
         }
       }
 
@@ -272,6 +311,9 @@
         </div>
       </div>
     </div>
+    <footer style="width:100%;text-align:center;padding:18px 0 10px 0;font-size:1.1rem;color:#888;letter-spacing:0.5px;">
+      Made with <span style='color:#e25555;font-size:1.2em;'>&hearts;</span> by Vansh Thakkar.
+    </footer>
     <script>
       // The full HTML template from your updated file, with placeholders and all sections/images
       const template = `
