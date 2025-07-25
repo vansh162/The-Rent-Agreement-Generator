@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rent Agreement Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     <style>
       body {
@@ -12,6 +12,32 @@
         background: #f7f7f7;
         margin: 0;
         padding: 0;
+      }
+      .instructions {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      }
+      .instructions h2 {
+        color: #333;
+        margin-bottom: 15px;
+      }
+      .instructions ol {
+        list-style-position: inside;
+        padding-left: 20px;
+      }
+      .instructions li {
+        margin-bottom: 10px;
+        color: #555;
+      }
+      .instructions a {
+        color: #2196f3;
+        text-decoration: none;
+      }
+      .instructions a:hover {
+        text-decoration: underline;
       }
       .container {
         max-width: 1200px;
@@ -97,13 +123,16 @@
 
       /* Print-specific styles for PDF generation */
       @media print {
-        body, .container, .preview-section {
+        body,
+        .container,
+        .preview-section {
           margin: 0 !important;
           padding: 0 !important;
           box-shadow: none !important;
           background: #fff !important;
         }
-        .form-section, .button-row {
+        .form-section,
+        .button-row {
           display: none !important;
         }
         #preview {
@@ -117,34 +146,71 @@
           margin: 0 0 12px 0 !important;
           text-align: justify !important;
         }
-        .WordSection1 h1, .WordSection1 h2, .WordSection1 h3, .WordSection1 b, .WordSection1 u {
-            font-size: inherit !important; /* Let the parent p tag control the size */
+        .WordSection1 h1,
+        .WordSection1 h2,
+        .WordSection1 h3,
+        .WordSection1 b,
+        .WordSection1 u {
+          font-size: inherit !important; /* Let the parent p tag control the size */
         }
       }
     </style>
   </head>
   <body>
     <h1>Rent Agreement Generator</h1>
+    <div class="instructions">
+      <h2>How to Generate Your Agreement</h2>
+      <ol>
+        <li>Fill in all the required details in the form on the left.</li>
+        <li>Click the "Download Agreement" button to generate a DOCX file.</li>
+        <li>
+          After downloading the DOCX file, you can convert it to PDF using
+          <a href="https://online2pdf.com/word-to-pdf" target="_blank"
+            >online2pdf.com</a
+          >.
+        </li>
+        <li>
+          <strong>Important Note:</strong> The downloaded DOCX file may not open
+          properly on mobile phones due to formatting issues. Please open it on
+          a PC or convert it to PDF for better viewing on mobile devices. We are
+          working on improving this functionality.
+        </li>
+        <li>
+          Click the "Convert to PDF" button below to open online2pdf.com in a
+          new tab.
+        </li>
+      </ol>
+    </div>
     <div class="container">
       <div class="form-section">
         <form id="rentForm">
-          <label>Owner Name: <input name="Owner_Name" /></label>
-          <label>Owner Caste: <input name="Owner_Cast" /></label>
-          <label>Owner Age: <input name="Owner_Age" /></label>
-          <label>Owner Occupation: <input name="Owner_Occupation" /></label>
           <label
-            >Owner Address: <textarea name="Owner_Address"></textarea>
+            >Number of Owners:
+            <input
+              type="number"
+              id="numOwners"
+              name="numOwners"
+              min="1"
+              max="5"
+              value="1"
+              style="width: 60px"
+            />
           </label>
-          <label>Rental Name: <input name="Rental_Name" /></label>
-          <label>Rental Caste: <input name="Rental_Cast" /></label>
-          <label>Rental Age: <input name="Rental_Age" /></label>
-          <label>Rental Occupation: <input name="Rental_Occupation" /></label>
+          <div id="ownersContainer"></div>
           <label
-            >Rental Address: <textarea name="Rental_Address"></textarea>
+            >Number of Rentals:
+            <input
+              type="number"
+              id="numRentals"
+              name="numRentals"
+              min="1"
+              max="5"
+              value="1"
+              style="width: 60px"
+            />
           </label>
-          <label
-            >Property Address: <textarea name="Property_Address"></textarea>
-          </label>
+          <div id="rentalsContainer"></div>
+          <label>Property Address: <input name="Property_Address" /></label>
           <label>BHK: <input name="BHK" /></label>
           <label>Extra Content after BHK: <input name="ExtraContent" /></label>
           <label>Agreement Start Date: <input name="Agreement_Start" /></label>
@@ -162,6 +228,30 @@
         </form>
       </div>
       <div class="preview-section">
+        <button
+          type="button"
+          id="boldBtn"
+          title="Bold (Ctrl+B)"
+          style="
+            display: none;
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            font-size: 1.6rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+            cursor: pointer;
+            transition: background 0.2s;
+          "
+        >
+          <b>B</b>
+        </button>
         <div
           id="preview"
           style="
@@ -173,6 +263,12 @@
           "
         >
           <!-- The template will be rendered here -->
+        </div>
+        <div class="button-row" style="margin-bottom: 16px">
+          <button type="button" id="toggleEditBtn">Edit Template</button>
+          <button type="button" id="resetTemplateBtn">
+            Reset to Auto Template
+          </button>
         </div>
       </div>
     </div>
@@ -418,105 +514,179 @@ witness.  </span></p>
 margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
 lang=EN-IN> </span></p>
 
-<p class=MsoNormal style='margin-bottom:6.25pt'>
+<p class=MsoNormal style='margin-bottom:0in'><span lang=EN-IN style='font-size:
+14.0pt;line-height:107%'> </span></p>
+
+{LICENSOR_SIGNATURE_BLOCK}
+
+{LICENSEE_SIGNATURE_BLOCK}
+
+</div>
+                    
+`;
+
+      let isEditMode = false;
+      let userEditedTemplate = null; // Stores user-edited HTML if any
+
+      function fillTemplate(data) {
+        // Owners block
+        const numOwners = parseInt(data.numOwners) || 1;
+        let ownersHtml = "";
+        for (let i = 1; i <= numOwners; i++) {
+          ownersHtml += `
+<p class=MsoNormal style='margin-right:.1pt;line-height:180%'><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>${
+            data[`Owner_Name_${i}`] || ""
+          }</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>, </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>${
+            data[`Owner_Cast_${i}`] || ""
+          } </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>by Caste, Aged about: </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>${
+            data[`Owner_Age_${i}`] || ""
+          } </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>years, Occupation:</span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'> ${
+            data[`Owner_Occupation_${i}`] || ""
+          }</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>, Residing at: </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>${
+            data[`Owner_Address_${i}`] || ""
+          } </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:180%'>(here in after referred as
+the “Licensor”) which expression shall unless repugnant to the context or
+meaning there of would mean and included her/his administrators and assigns) of
+the ONE PART.  </span></p>
+<p class=MsoNormal style='margin-right:.1pt;line-height:180%'><span lang=EN-IN
+style='font-size:14.0pt;line-height:180%'>&nbsp;</span></p>
+          `;
+        }
+        let html = template.replace(
+          /<p class=MsoNormal style='margin-right:.1pt;line-height:180%'>[\s\S]*?the ONE PART[\s\S]*?<\/p>\s*<p class=MsoNormal style='margin-right:.1pt;line-height:180%'>[\s\S]*?&nbsp;<\/span><\/p>/,
+          ownersHtml
+        );
+
+        // Rentals block
+        const numRentals = parseInt(data.numRentals) || 1;
+        let rentalsHtml = "";
+        for (let i = 1; i <= numRentals; i++) {
+          rentalsHtml += `
+<p class=MsoNormal style='margin-right:.1pt;line-height:182%'><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>${
+            data[`Rental_Name_${i}`] || ""
+          }</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>,  </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>${
+            data[`Rental_Cast_${i}`] || ""
+          } </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>by Caste,  Aged about: </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>${
+            data[`Rental_Age_${i}`] || ""
+          }</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> years, Occupation:</span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> ${
+            data[`Rental_Occupation_${i}`] || ""
+          }</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>, Residing at  <b>${
+            data[`Rental_Address_${i}`] || ""
+          }</b></span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> </span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>(here in after referred as
+the “Licensee”)  which expression shall unless repugnant to the context or
+meaning  there of would mean and included her/his administrators and assigns)</span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>  of the other part.</span></b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> </span><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'> </span></b></p>
+<p class=MsoNormal style='margin-right:.1pt;line-height:182%'><b><span
+lang=EN-IN style='font-size:14.0pt;line-height:182%'>&nbsp;</span></b></p>
+          `;
+        }
+        html = html.replace(
+          /<p class=MsoNormal style='margin-right:.1pt;line-height:182%'>[\s\S]*?of the other part\.<\/span><\/b><span[\s\S]*?<\/p>\s*<p class=MsoNormal style='margin-right:.1pt;line-height:182%'>[\s\S]*?&nbsp;<\/span><\/b><\/p>/,
+          rentalsHtml
+        );
+
+        // Licensor signature block (repeat for each owner)
+        const licensorSignatureBlock = (ownerName) => `
+        <p class=MsoNormal style='margin-bottom:6.25pt'>
 <img width=85 height=103 id="Group 3029" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABnAgMAAAAMKeZvAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAMUExURQAAAAAAAAAAAAAAADXpN5YAAAAEdFJOU8//AO8TkFPOAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAK0lEQVRIx2MQDcUCGBiyVmEBDqPCo8KjwqPCo8KjwqPCo8IjSvgqtpbSAQB2SI+4JzxktAAAAABJRU5ErkJggg==" align=left hspace=12>
 <span lang=EN-IN>        
 <img width=94 height=52 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAAA0CAMAAAA0Y39gAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABjUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGZodN4AAAAhdFJOUwAoUICfv7dgQCCnx//Xr0jfWDBoOM+Hl+d4GPcIEI9w7xAu6QkAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAH8SURBVFhHtZjZsoMgDIZVQEUUUYtbQfv+T3nGpa1yxKLid9PhhyZhmRB0HANcDwAAIJrxh1YQqqNOgEMQkTihk8GZdHIWMx9kufoPY3BBY4ZA9lA73uAURDzm4ISLvOSs8lR1ixzw2mzkmweseXMgpragT5qpqgaPkKBVxV8IL2KFUNV/iIJR7WLvg6sa7Icly7rCqmiOBAzuOEiTRqraMUSQBKo2I6G/49oUnZVU6/cgm4aqbadnkJAqZ0j4xVq4hkdWeyj9dNm8Ts4XB1BQy9YdB/Nv/HBjL66Sk/f6N6XSZYUsmn6/fuwSTUmOH8iNR2jZELZHVd0WXX9j8FP4bqKq9vBTp+9U0R5959BD1+Qxcu6Qk3eTCW3tsAu300/iu83fvDi2U/GSnN99MHOuivYYDv29SeHG1RktC2atRFgzGw6R2mGHai4+xrxsnU/UwrfxTlJYlAqSuOu+66xMYmT5dLZrgxhZTT0uUcKVpLRXjjTLEvCjWZpA629G6tqZQJDocrCFCWAf6t9PLiGmz9NNQsp0oU88ItafXaKMoN9lB+7q8v/G/0QWLDJbWtmwpDMbOuP25HXkQTyMh5l+k5aEXXIwmgEZRC8EQbhzG4iw6NAL9WczVhgAVD9R1Q9fiT6TF0MrAIiNPWZT1DPGiBBi8cxzaEHw9afnD3D4GjlZ9lbfAAAAAElFTkSuQmCC">
 </span>
 <span lang=EN-IN>                                                 </span>
 </p>
-
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
 lang=EN-IN> </span></p>
-
 <p class=MsoNormal style='margin-bottom:0in'><span lang=EN-IN style='font-size:
 14.0pt;line-height:107%'> </span></p>
-
 <p class=MsoNormal style='margin-top:0in;margin-right:133.1pt;margin-bottom:
-.4pt;margin-left:.5pt;text-indent:-.5pt;line-height:106%'><span lang=EN-IN
+.4pt;margin-left:.5pt;text-indent:-.5pt;line-height:106%'>
+<span lang=EN-IN
 style='font-size:16.0pt;line-height:106%'>Signed, Sealed and delivered by the
 within named Licensor </span><span lang=EN-IN style='font-size:12.0pt;
 line-height:106%'> </span></p>
-
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:.15pt;
 margin-left:.5pt;text-indent:-.5pt'><b><span lang=EN-IN style='font-size:14.0pt;
-line-height:107%'>{Owner_Name}</span></b><span lang=EN-IN style='font-size:
+line-height:107%'>${ownerName}</span></b><span lang=EN-IN style='font-size:
 14.0pt;line-height:107%'>                                            </span><b><span
 lang=EN-IN style='font-size:14.0pt;line-height:107%'>____________________</span></b></p>
-
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:.3pt;
 margin-left:.75pt'><span lang=EN-IN> </span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
 lang=EN-IN> </span></p>
+        `;
+        let licensorBlocks = "";
+        for (let i = 1; i <= numOwners; i++) {
+          licensorBlocks += licensorSignatureBlock(
+            data[`Owner_Name_${i}`] || ""
+          );
+        }
+        html = html.replace("{LICENSOR_SIGNATURE_BLOCK}", licensorBlocks);
 
-<p class=MsoNormal style='margin-top:0in;margin-right:382.45pt;margin-bottom:
-.15pt;margin-left:.75pt;line-height:102%'><span lang=EN-IN> </span><span
-lang=EN-IN style='font-size:14.0pt;line-height:102%'> </span><span lang=EN-IN> </span></p>
-
-<p class=MsoNormal style='margin-bottom:6.25pt'>
+        // Licensee signature block (repeat for each rental)
+        const licenseeSignatureBlock = (rentalName) => `
+        <p class=MsoNormal style='margin-bottom:6.25pt'>
 <img width=85 height=103 id="Group 3029" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFUAAABnAgMAAAAMKeZvAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAMUExURQAAAAAAAAAAAAAAADXpN5YAAAAEdFJOU8//AO8TkFPOAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAK0lEQVRIx2MQDcUCGBiyVmEBDqPCo8KjwqPCo8KjwqPCo8IjSvgqtpbSAQB2SI+4JzxktAAAAABJRU5ErkJggg==" align=left hspace=12>
 <span lang=EN-IN>        
 <img width=94 height=52 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAAA0CAMAAAA0Y39gAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABjUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGZodN4AAAAhdFJOUwAoUICfv7dgQCCnx//Xr0jfWDBoOM+Hl+d4GPcIEI9w7xAu6QkAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAH8SURBVFhHtZjZsoMgDIZVQEUUUYtbQfv+T3nGpa1yxKLid9PhhyZhmRB0HANcDwAAIJrxh1YQqqNOgEMQkTihk8GZdHIWMx9kufoPY3BBY4ZA9lA73uAURDzm4ISLvOSs8lR1ixzw2mzkmweseXMgpragT5qpqgaPkKBVxV8IL2KFUNV/iIJR7WLvg6sa7Icly7rCqmiOBAzuOEiTRqraMUSQBKo2I6G/49oUnZVU6/cgm4aqbadnkJAqZ0j4xVq4hkdWeyj9dNm8Ts4XB1BQy9YdB/Nv/HBjL66Sk/f6N6XSZYUsmn6/fuwSTUmOH8iNR2jZELZHVd0WXX9j8FP4bqKq9vBTp+9U0R5959BD1+Qxcu6Qk3eTCW3tsAu300/iu83fvDi2U/GSnN99MHOuivYYDv29SeHG1RktC2atRFgzGw6R2mGHai4+xrxsnU/UwrfxTlJYlAqSuOu+66xMYmT5dLZrgxhZTT0uUcKVpLRXjjTLEvCjWZpA629G6tqZQJDocrCFCWAf6t9PLiGmz9NNQsp0oU88ItafXaKMoN9lB+7q8v/G/0QWLDJbWtmwpDMbOuP25HXkQTyMh5l+k5aEXXIwmgEZRC8EQbhzG4iw6NAL9WczVhgAVD9R1Q9fiT6TF0MrAIiNPWZT1DPGiBBi8cxzaEHw9afnD3D4GjlZ9lbfAAAAAElFTkSuQmCC">
 </span>
 <span lang=EN-IN>                                                 </span>
 </p>
-
-<p class=MsoNormal style='margin-bottom:1.85pt'><span lang=EN-IN
-style='font-size:14.0pt;line-height:107%'> </span></p>
-
-<p class=MsoNormal style='margin-bottom:2.1pt'><span lang=EN-IN
-style='font-size:14.0pt;line-height:107%'> </span></p>
-
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
+lang=EN-IN> </span></p>
+<p class=MsoNormal style='margin-bottom:0in'><span lang=EN-IN style='font-size:
+14.0pt;line-height:107%'> </span></p>
 <p class=MsoNormal style='margin-top:0in;margin-right:133.1pt;margin-bottom:
-.4pt;margin-left:.5pt;text-indent:-.5pt;line-height:106%'><span lang=EN-IN
+.4pt;margin-left:.5pt;text-indent:-.5pt;line-height:106%'>
+<span lang=EN-IN
 style='font-size:16.0pt;line-height:106%'>Signed, Sealed and delivered by the
 within named Licensee </span><span lang=EN-IN style='font-size:12.0pt;
 line-height:106%'> </span></p>
-
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:.15pt;
 margin-left:.5pt;text-indent:-.5pt'><b><span lang=EN-IN style='font-size:14.0pt;
-line-height:107%'>{Rental_Name}</span></b><span lang=EN-IN style='font-size:
+line-height:107%'>${rentalName}</span></b><span lang=EN-IN style='font-size:
 14.0pt;line-height:107%'>                                            </span><b><span
 lang=EN-IN style='font-size:14.0pt;line-height:107%'>____________________</span></b></p>
-
-<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
-margin-left:.75pt'><b><i><span lang=EN-IN style='font-size:17.0pt;line-height:
-107%'> </span></i></b><span lang=EN-IN> </span></p>
-
-<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
-margin-left:.75pt'><span lang=EN-IN>&nbsp;</span></p>
-
-<h1><span lang=EN-IN>WITNESS: -  </span></h1>
-
-<p class=MsoNormal style='margin-top:0in;margin-right:133.1pt;margin-bottom:
-.4pt;margin-left:36.05pt;text-indent:-36.05pt;line-height:106%'><span
-lang=EN-IN style='font-size:14.0pt;line-height:106%;font-family:"Arial",sans-serif;
-color:black'>(1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:106%'>_______________
-</span><span lang=EN-IN> </span></p>
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:.3pt;
+margin-left:.75pt'><span lang=EN-IN> </span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.75pt'><span lang=EN-IN style='font-size:14.0pt;line-height:107%'> </span><span
 lang=EN-IN> </span></p>
-
-<p class=MsoNormal style='margin-top:0in;margin-right:133.1pt;margin-bottom:
-.4pt;margin-left:36.05pt;text-indent:-36.05pt;line-height:106%'><span
-lang=EN-IN style='font-size:14.0pt;line-height:106%;font-family:"Arial",sans-serif;
-color:black'>(2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:106%'>_______________
-</span><span lang=EN-IN> </span></p>
-
-<p class=MsoNormal><span lang=EN-IN>&nbsp;</span></p>
-
-</div>
-                    
-`;
-
-      function fillTemplate(data) {
-        let html = template;
+        `;
+        let licenseeBlocks = "";
+        for (let i = 1; i <= numRentals; i++) {
+          licenseeBlocks += licenseeSignatureBlock(
+            data[`Rental_Name_${i}`] || ""
+          );
+        }
+        html = html.replace("{LICENSEE_SIGNATURE_BLOCK}", licenseeBlocks);
+        // Replace other placeholders
         for (const key in data) {
           const regex = new RegExp("{" + key + "}", "g");
           html = html.replace(regex, data[key] || "");
@@ -525,9 +695,15 @@ color:black'>(2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nb
       }
 
       function updatePreview() {
+        if (isEditMode && userEditedTemplate !== null) {
+          // Don't overwrite user edits in edit mode
+          return;
+        }
         const form = document.getElementById("rentForm");
         const data = Object.fromEntries(new FormData(form).entries());
-        document.getElementById("preview").innerHTML = fillTemplate(data);
+        const html = fillTemplate(data);
+        document.getElementById("preview").innerHTML = html;
+        if (!isEditMode) userEditedTemplate = null; // Clear user edits if not in edit mode
       }
 
       document
@@ -535,25 +711,126 @@ color:black'>(2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nb
         .addEventListener("input", updatePreview);
       window.onload = updatePreview;
 
-      window.downloadPDF = function () {
-        const element = document.getElementById("preview");
-        const opt = {
-          margin:       0.5, // 0.5 inch margin
-          filename:     'RentAgreement.pdf',
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-          jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
+      // Toggle Edit Mode
+      document.getElementById("toggleEditBtn").onclick = function () {
+        const preview = document.getElementById("preview");
+        isEditMode = !isEditMode;
+        if (isEditMode) {
+          // Enter edit mode
+          preview.contentEditable = "true";
+          preview.style.border = "2px dashed #007bff";
+          document.getElementById("toggleEditBtn").textContent = "Preview Mode";
+          userEditedTemplate = preview.innerHTML;
+          document.getElementById("boldBtn").style.display = "block";
+        } else {
+          // Exit edit mode
+          preview.contentEditable = "false";
+          preview.style.border = "";
+          document.getElementById("toggleEditBtn").textContent =
+            "Edit Template";
+          userEditedTemplate = preview.innerHTML;
+          document.getElementById("boldBtn").style.display = "none";
+        }
+      };
 
-        // New Promise-based usage
-        html2pdf().set(opt).from(element).save();
+      // Reset to auto-filled template
+      document.getElementById("resetTemplateBtn").onclick = function () {
+        userEditedTemplate = null;
+        isEditMode = false;
+        document.getElementById("toggleEditBtn").textContent = "Edit Template";
+        document.getElementById("preview").contentEditable = "false";
+        document.getElementById("preview").style.border = "";
+        document.getElementById("boldBtn").style.display = "none";
+        updatePreview();
+      };
+
+      // Bold button functionality
+      document.getElementById("boldBtn").onclick = function () {
+        document.execCommand("bold", false, null);
+        // Update userEditedTemplate after bolding
+        if (isEditMode) {
+          userEditedTemplate = document.getElementById("preview").innerHTML;
+        }
+      };
+
+      // If in edit mode, keep user edits in sync
+      document.getElementById("preview").addEventListener("input", function () {
+        if (isEditMode) {
+          userEditedTemplate = document.getElementById("preview").innerHTML;
+        }
+      });
+
+      // Dynamically generate owner fields
+      function renderOwnerFields() {
+        const numOwners =
+          parseInt(document.getElementById("numOwners").value) || 1;
+        const container = document.getElementById("ownersContainer");
+        let html = "";
+        for (let i = 1; i <= numOwners; i++) {
+          html += `
+            <fieldset style="margin-bottom: 12px; border: 1px solid #eee; padding: 10px; border-radius: 6px;">
+              <legend>Owner ${i}</legend>
+              <label>Owner Name: <input name="Owner_Name_${i}" /></label>
+              <label>Owner Caste: <input name="Owner_Cast_${i}" /></label>
+              <label>Owner Age: <input name="Owner_Age_${i}" /></label>
+              <label>Owner Occupation: <input name="Owner_Occupation_${i}" /></label>
+              <label>Owner Address: <textarea name="Owner_Address_${i}"></textarea></label>
+            </fieldset>
+          `;
+        }
+        container.innerHTML = html;
+      }
+      document
+        .getElementById("numOwners")
+        .addEventListener("input", function () {
+          renderOwnerFields();
+          updatePreview();
+        });
+      // Initial render
+      renderOwnerFields();
+
+      // Dynamically generate rental fields
+      function renderRentalFields() {
+        const numRentals =
+          parseInt(document.getElementById("numRentals").value) || 1;
+        const container = document.getElementById("rentalsContainer");
+        let html = "";
+        for (let i = 1; i <= numRentals; i++) {
+          html += `
+            <fieldset style="margin-bottom: 12px; border: 1px solid #eee; padding: 10px; border-radius: 6px;">
+              <legend>Rental ${i}</legend>
+              <label>Rental Name: <input name="Rental_Name_${i}" /></label>
+              <label>Rental Caste: <input name="Rental_Cast_${i}" /></label>
+              <label>Rental Age: <input name="Rental_Age_${i}" /></label>
+              <label>Rental Occupation: <input name="Rental_Occupation_${i}" /></label>
+              <label>Rental Address: <textarea name="Rental_Address_${i}"></textarea></label>
+            </fieldset>
+          `;
+        }
+        container.innerHTML = html;
+      }
+      document
+        .getElementById("numRentals")
+        .addEventListener("input", function () {
+          renderRentalFields();
+          updatePreview();
+        });
+      // Initial render
+      renderRentalFields();
+
+      // Redirect to online2pdf.com
+      window.downloadPDF = function () {
+        window.open("https://online2pdf.com/word-to-pdf", "_blank");
       };
 
       window.downloadDOCX = function () {
         const element = document.getElementById("preview");
+        // Use user-edited template if available
         const html =
           '<html><head><meta charset="utf-8"></head><body>' +
-          element.innerHTML +
+          (userEditedTemplate !== null
+            ? userEditedTemplate
+            : element.innerHTML) +
           "</body></html>";
         const converted = window.htmlDocx.asBlob(html);
         const link = document.createElement("a");
