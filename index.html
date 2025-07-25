@@ -8,21 +8,35 @@
     <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        background: #f7f7f7;
+        font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
         margin: 0;
         padding: 0;
+        min-height: 100vh;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 24px;
+        font-size: 2.3rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #2d3a4a;
       }
       .instructions {
         background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        padding: 24px 24px 18px 24px;
+        border-radius: 14px;
+        margin-bottom: 28px;
+        box-shadow: 0 4px 24px 0 rgba(60, 72, 88, 0.10);
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
       }
       .instructions h2 {
-        color: #333;
+        color: #1a2233;
         margin-bottom: 15px;
+        font-size: 1.3rem;
+        font-weight: 600;
       }
       .instructions ol {
         list-style-position: inside;
@@ -30,11 +44,13 @@
       }
       .instructions li {
         margin-bottom: 10px;
-        color: #555;
+        color: #4a5568;
+        font-size: 1.05rem;
       }
       .instructions a {
-        color: #2196f3;
+        color: #007bff;
         text-decoration: none;
+        font-weight: 500;
       }
       .instructions a:hover {
         text-decoration: underline;
@@ -43,57 +59,115 @@
         max-width: 1200px;
         margin: 40px auto;
         background: #fff;
-        padding: 30px 40px 40px 40px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 32px 32px 36px 32px;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px 0 rgba(60, 72, 88, 0.13);
         display: flex;
         gap: 40px;
+        transition: box-shadow 0.2s;
       }
       .form-section {
         flex: 1;
+        background: #f6f8fa;
+        border-radius: 12px;
+        padding: 24px 18px 18px 18px;
+        box-shadow: 0 2px 8px 0 rgba(60, 72, 88, 0.06);
+        min-width: 260px;
       }
       .preview-section {
         flex: 2;
-        background: #fcfcfc;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-        min-width: 400px;
-      }
-      h1 {
-        text-align: center;
-        margin-bottom: 24px;
+        background: #fafdff;
+        border-radius: 12px;
+        padding: 28px 20px 20px 20px;
+        box-shadow: 0 2px 8px 0 rgba(60, 72, 88, 0.06);
+        min-width: 340px;
+        transition: box-shadow 0.2s;
       }
       label {
         display: block;
-        margin: 16px 0 6px 0;
-        font-weight: bold;
+        margin: 18px 0 7px 0;
+        font-weight: 600;
+        color: #2d3a4a;
+        font-size: 1.07rem;
+        letter-spacing: 0.1px;
       }
       input,
       textarea {
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 10px 12px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 1.08rem;
+        background: #fafdff;
+        color: #2d3a4a;
+        margin-bottom: 2px;
+        transition: border 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
       }
-      button {
-        margin-top: 24px;
-        width: 48%;
-        padding: 12px;
-        background: #007bff;
-        color: #fff;
+      input:focus,
+      textarea:focus {
+        border: 1.5px solid #007bff;
+        outline: none;
+        box-shadow: 0 0 0 2px #b6d4fe;
+        background: #fff;
+      }
+      textarea {
+        min-height: 48px;
+        resize: vertical;
+      }
+      fieldset {
         border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        cursor: pointer;
+        background: #f3f6fa;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 10px 10px 6px 10px;
+        box-shadow: 0 1px 4px 0 rgba(60, 72, 88, 0.04);
       }
-      button:hover {
-        background: #0056b3;
+      legend {
+        font-size: 1.08rem;
+        font-weight: 600;
+        color: #007bff;
+        letter-spacing: 0.2px;
+        margin-bottom: 2px;
       }
       .button-row {
         display: flex;
         gap: 4%;
+        margin-top: 18px;
       }
+      button {
+        margin-top: 0;
+        width: 48%;
+        padding: 13px 0;
+        background: linear-gradient(90deg, #007bff 60%, #00c6fb 100%);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.13rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px 0 rgba(60, 72, 88, 0.08);
+        transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
+      }
+      button:hover {
+        background: linear-gradient(90deg, #0056b3 60%, #009ec3 100%);
+        box-shadow: 0 4px 16px 0 rgba(60, 72, 88, 0.13);
+        transform: translateY(-2px) scale(1.03);
+      }
+      #boldBtn {
+        background: linear-gradient(90deg, #ff5e62 0%, #ff9966 100%);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        font-size: 1.6rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      #boldBtn:hover {
+        background: linear-gradient(90deg, #e94e77 0%, #ff9966 100%);
+      }
+      /* Responsive styles */
       @media (max-width: 900px) {
         .container {
           flex-direction: column;
@@ -427,7 +501,8 @@ mutually agreed upon at least one month prior to the expiry of this agreement.
 <p class=MsoNormal style='margin-top:0in;margin-right:.1pt;margin-bottom:.2pt;
 margin-left:36.05pt;text-align:justify;text-indent:-36.05pt;line-height:179%'><span
 lang=EN-IN style='font-size:13.0pt;line-height:179%;font-family:"Arial",sans-serif;
-color:black'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:179%'>The
+color:black'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-IN style='font-size:14.0pt;line-height:179%'>The
 Licensee granted for use the premises in meant strictly for </span><b><span
 lang=EN-IN style='font-size:14.0pt;line-height:179%'>Residential</span></b><span
 lang=EN-IN style='font-size:14.0pt;line-height:179%'> use of the Licensee. </span><b><span
@@ -975,6 +1050,10 @@ lang=EN-IN> </span></p>
       };
     </script>
     <script defer src="https://vercel.com/analytics/script.js"></script>
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
     <datalist id="occupation-suggestions">
       <option value="Job"></option>
       <option value="Business"></option>
