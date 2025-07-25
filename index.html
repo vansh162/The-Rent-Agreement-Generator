@@ -771,9 +771,9 @@ lang=EN-IN> </span></p>
             <fieldset style="margin-bottom: 12px; border: 1px solid #eee; padding: 10px; border-radius: 6px;">
               <legend>Owner ${i}</legend>
               <label>Owner Name: <input name="Owner_Name_${i}" /></label>
-              <label>Owner Caste: <input name="Owner_Cast_${i}" /></label>
+              <label>Owner Caste: <input name="Owner_Cast_${i}" value="Hindu" /></label>
               <label>Owner Age: <input name="Owner_Age_${i}" /></label>
-              <label>Owner Occupation: <input name="Owner_Occupation_${i}" /></label>
+              <label>Owner Occupation: <input name="Owner_Occupation_${i}" list="occupation-suggestions" /></label>
               <label>Owner Address: <textarea name="Owner_Address_${i}"></textarea></label>
             </fieldset>
           `;
@@ -800,9 +800,9 @@ lang=EN-IN> </span></p>
             <fieldset style="margin-bottom: 12px; border: 1px solid #eee; padding: 10px; border-radius: 6px;">
               <legend>Rental ${i}</legend>
               <label>Rental Name: <input name="Rental_Name_${i}" /></label>
-              <label>Rental Caste: <input name="Rental_Cast_${i}" /></label>
+              <label>Rental Caste: <input name="Rental_Cast_${i}" value="Hindu" /></label>
               <label>Rental Age: <input name="Rental_Age_${i}" /></label>
-              <label>Rental Occupation: <input name="Rental_Occupation_${i}" /></label>
+              <label>Rental Occupation: <input name="Rental_Occupation_${i}" list="occupation-suggestions" /></label>
               <label>Rental Address: <textarea name="Rental_Address_${i}"></textarea></label>
             </fieldset>
           `;
@@ -817,6 +817,99 @@ lang=EN-IN> </span></p>
         });
       // Initial render
       renderRentalFields();
+
+      // Auto-calculate Agreement End Date
+      document.querySelector('input[name="Agreement_Start"]').addEventListener('input', function(e) {
+        const startVal = e.target.value.trim();
+        // Match DD.MM.YYYY
+        const match = startVal.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+        if (match) {
+          let [_, dd, mm, yyyy] = match;
+          let startDate = new Date(`${yyyy}-${mm}-${dd}`);
+          if (!isNaN(startDate)) {
+            // Add 11 months
+            let endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + 11);
+            // Subtract 1 day
+            endDate.setDate(endDate.getDate() - 1);
+            // Format as DD.MM.YYYY
+            let endDD = String(endDate.getDate()).padStart(2, '0');
+            let endMM = String(endDate.getMonth() + 1).padStart(2, '0');
+            let endYYYY = endDate.getFullYear();
+            document.querySelector('input[name="Agreement_End"]').value = `${endDD}.${endMM}.${endYYYY}`;
+            updatePreview();
+          }
+        }
+      });
+
+      // Auto-calculate age from year of birth for owner and rental age fields
+      function handleAutoAge(e) {
+        const val = e.target.value.trim();
+        if (/^\d{4}$/.test(val)) {
+          const year = parseInt(val, 10);
+          const now = new Date();
+          const age = now.getFullYear() - year;
+          if (age > 0 && age < 150) {
+            e.target.value = age;
+            updatePreview();
+          }
+        }
+      }
+      // Delegate event for all current and future age fields
+      document.addEventListener('input', function(e) {
+        if (e.target && e.target.name && (/Owner_Age_\d+/.test(e.target.name) || /Rental_Age_\d+/.test(e.target.name))) {
+          handleAutoAge(e);
+        }
+      });
+
+      // Number to words (Indian style)
+      function numberToWords(num) {
+        if (typeof num === 'string') num = num.replace(/,/g, '');
+        num = parseInt(num, 10);
+        if (isNaN(num)) return '';
+        if (num === 0) return 'Zero';
+        const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+        const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+        const units = [
+          { value: 10000000, str: 'Crore' },
+          { value: 100000, str: 'Lakh' },
+          { value: 1000, str: 'Thousand' },
+          { value: 100, str: 'Hundred' }
+        ];
+        let words = '';
+        for (let i = 0; i < units.length; i++) {
+          const unitValue = Math.floor(num / units[i].value);
+          if (unitValue > 0) {
+            words += numberToWords(unitValue) + ' ' + units[i].str + ' ';
+            num = num % units[i].value;
+          }
+        }
+        if (num > 0) {
+          if (words !== '') words += 'and ';
+          if (num < 20) {
+            words += ones[num];
+          } else {
+            words += tens[Math.floor(num / 10)];
+            if (num % 10 > 0) words += ' ' + ones[num % 10];
+          }
+        }
+        return words.trim();
+      }
+
+      // Auto-fill Rent in words and Deposit in words
+      function handleNumberToWords(e) {
+        if (e.target.name === 'Rent') {
+          const words = numberToWords(e.target.value);
+          document.querySelector('input[name="Rent_in_words"]').value = words;
+          updatePreview();
+        } else if (e.target.name === 'Deposit') {
+          const words = numberToWords(e.target.value);
+          document.querySelector('input[name="Desopit_in_words"]').value = words;
+          updatePreview();
+        }
+      }
+      document.querySelector('input[name="Rent"]').addEventListener('input', handleNumberToWords);
+      document.querySelector('input[name="Deposit"]').addEventListener('input', handleNumberToWords);
 
       // Redirect to online2pdf.com
       window.downloadPDF = function () {
@@ -839,5 +932,11 @@ lang=EN-IN> </span></p>
         link.click();
       };
     </script>
+    <datalist id="occupation-suggestions">
+      <option value="Job"></option>
+      <option value="Business"></option>
+      <option value="Housewife"></option>
+      <option value="Retired"></option>
+    </datalist>
   </body>
 </html>
