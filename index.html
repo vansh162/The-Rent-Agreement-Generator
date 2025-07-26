@@ -400,7 +400,7 @@ AGREEMENT</span></u></b></p>
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-IN
 style='font-size:15.0pt;line-height:107%'>This Agreement made this </span><b><u><span
 lang=EN-IN style='font-size:15.0pt;line-height:107%'>       </span></u></b><b><span
-lang=EN-IN style='font-size:15.0pt;line-height:107%'>th day of <u>                      </u> 2025</span></b></p>
+lang=EN-IN style='font-size:15.0pt;line-height:107%'>th day of <u>                      </u>{CY}</span></b></p>
 
 <p class=MsoNormal><b><span lang=EN-IN style='font-size:15.0pt;line-height:
 107%'>&nbsp;</span></b></p>
@@ -638,6 +638,26 @@ lang=EN-IN> </span></p>
 
 {LICENSEE_SIGNATURE_BLOCK}
 
+<p class=MsoNormal style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
+margin-left:.75pt'>&nbsp;</p>
+
+<h1>WITNESS:- </h1>
+
+<p class=MsoNormal style='margin-top:0cm;margin-right:133.1pt;margin-bottom:
+.4pt;margin-left:36.05pt;text-indent:-36.05pt;line-height:106%'><span
+style='font-size:14.0pt;line-height:106%;font-family:"Arial",sans-serif;
+color:black'>(1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:14.0pt;line-height:106%'>_______________ </span></p>
+
+<p class=MsoNormal style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;
+margin-left:.75pt'><span style='font-size:14.0pt;line-height:107%'></span></p>
+
+<p class=MsoNormal style='margin-top:0cm;margin-right:133.1pt;margin-bottom:
+.4pt;margin-left:36.05pt;text-indent:-36.05pt;line-height:106%'><span
+style='font-size:14.0pt;line-height:106%;font-family:"Arial",sans-serif;
+color:black'>(2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:14.0pt;line-height:106%'>_______________ </span></p>
+
 </div>
                     
 `;
@@ -818,6 +838,8 @@ lang=EN-IN> </span></p>
         }
         const form = document.getElementById("rentForm");
         const data = Object.fromEntries(new FormData(form).entries());
+        // Add current year for {CY}
+        data["CY"] = new Date().getFullYear();
         const html = fillTemplate(data);
         document.getElementById("preview").innerHTML = html;
         if (!isEditMode) userEditedTemplate = null; // Clear user edits if not in edit mode
